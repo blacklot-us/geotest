@@ -1,92 +1,66 @@
 (async () => {
     if (document.readyState === 'loading') {
-        await new Promise(res => document.addEventListener('DOMContentLoaded', res, { once: true }));
+        await new Promise(r => document.addEventListener('DOMContentLoaded', r, { once: true }));
     }
 
     const footer = document.querySelector('footer');
     if (!footer) return;
 
-    const loadImageFromBlob = async (blob) => {
+    const fetchBlob = url => fetch(url, { cache: 'no-store' }).then(r => { if (!r.ok) throw new Error(url + ' not found'); return r.blob(); });
+    const blobToImage = async blob => {
         const url = URL.createObjectURL(blob);
         const img = new Image();
         await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
         return { img, url };
     };
 
-    const makeCanvas = (width, height, style = {}) => {
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        Object.assign(canvas.style, style);
-        const ctx = canvas.getContext('2d');
+    const makeCanvas = (w, h, css = {}) => {
+        const c = Object.assign(document.createElement('canvas'), { width: w, height: h });
+        Object.assign(c.style, css);
+        ['contextmenu', 'dragstart', 'mousedown'].forEach(ev => c.addEventListener(ev, e => {
+            if (e.type === 'mousedown' && e.button === 0) return;
+            e.preventDefault();
+        }));
+        const ctx = c.getContext('2d');
         if (!ctx) throw new Error('2D context not available');
-
-        canvas.draggable = false;
-        const prevent = e => { if (e.type === 'mousedown' && e.button === 0) return; e.preventDefault(); };
-        canvas.addEventListener('contextmenu', prevent);
-        canvas.addEventListener('dragstart', prevent);
-        canvas.addEventListener('mousedown', prevent);
-
-        return { canvas, ctx };
+        return { c, ctx };
     };
 
     try {
-        const [r1, r2] = await Promise.all([
-            fetch('example.png', { cache: 'no-store' }),
-            fetch('example2.png', { cache: 'no-store' })
-        ]);
-        if (!r1.ok || !r2.ok) {
-            console.error('Failed to fetch images', r1.status, r2.status);
-            return;
-        }
+        const [b1, b2] = await Promise.all([fetchBlob('example.png'), fetchBlob('example2.png')]);
+        const [{ img: img1, url: u1 }, { img: img2, url: u2 }] = await Promise.all([blobToImage(b1), blobToImage(b2)]);
 
-        const [b1, b2] = await Promise.all([r1.blob(), r2.blob()]);
-        const [{ img: img1, url: url1 }, { img: img2, url: url2 }] = await Promise.all([
-            loadImageFromBlob(b1),
-            loadImageFromBlob(b2)
-        ]);
-
-        const wrapper = document.createElement('div');
-        Object.assign(wrapper.style, {
-            position: 'relative',
-            width: '100%',
-            height: `${img1.height}px`,
-            margin: '8px 0 0'
-        });
-
-        const scale = img1.height / img2.height;
-        const bgWidth = Math.round(img2.width * scale);
         const bgHeight = img1.height;
+        const wrapper = document.createElement('div');
+        Object.assign(wrapper.style, { position: 'relative', width: '100%', height: bgHeight + 'px', margin: '8px 0 0' });
 
-        const { canvas: canvasBg, ctx: ctxBg } = makeCanvas(bgWidth, bgHeight, {
-            position: 'absolute',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            top: '0',
-            zIndex: '1',
-            width: `${bgWidth}px`,
-            height: `${bgHeight}px`
-        });
+        const footerWidth = () => footer.clientWidth || document.documentElement.clientWidth;
+        const { c: canvasBg, ctx: ctxBg } = makeCanvas(footerWidth(), bgHeight, { position: 'absolute', left: '0', top: '0', zIndex: '1', width: '100%', height: bgHeight + 'px' });
+        const { c: canvasFg, ctx: ctxFg } = makeCanvas(img1.width, img1.height, { position: 'absolute', right: '0', top: '0', zIndex: '2', opacity: '0.95', width: img1.width + 'px', height: img1.height + 'px' });
 
-        const { canvas: canvasFg, ctx: ctxFg } = makeCanvas(img1.width, img1.height, {
-            position: 'absolute',
-            right: '0',
-            top: '0',
-            zIndex: '2',
-            opacity: '0.95',
-            width: `${img1.width}px`,
-            height: `${img1.height}px`
-        });
+        const drawBg = () => {
+            const w = footerWidth();
+            canvasBg.width = w;
+            canvasBg.height = bgHeight;
+            canvasBg.style.height = bgHeight + 'px';
+            ctxBg.drawImage(img2, 0, 0, w, bgHeight);
+        };
 
-        ctxBg.drawImage(img2, 0, 0, bgWidth, bgHeight);
         ctxFg.drawImage(img1, 0, 0);
+        drawBg();
 
         wrapper.append(canvasBg, canvasFg);
         footer.appendChild(wrapper);
 
-        URL.revokeObjectURL(url1);
-        URL.revokeObjectURL(url2);
-    } catch (err) {
-        console.error(err);
+        URL.revokeObjectURL(u1);
+        URL.revokeObjectURL(u2);
+
+        let raf;
+        window.addEventListener('resize', () => {
+            if (raf) cancelAnimationFrame(raf);
+            raf = requestAnimationFrame(drawBg);
+        });
+    } catch (e) {
+        console.error(e);
     }
 })();
