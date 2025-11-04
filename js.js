@@ -27,25 +27,32 @@
     };
 
     try {
-        const [b1, b2] = await Promise.all([fetchBlob('example.png'), fetchBlob('example2.png')]);
+        const [b1, b2] = await Promise.all([fetchBlob('y2k-angels.png'), fetchBlob('vinyl-decal.png')]);
         const [{ img: img1, url: u1 }, { img: img2, url: u2 }] = await Promise.all([blobToImage(b1), blobToImage(b2)]);
 
-        const bgHeight = img1.height;
+        const wrapperHeight = img1.height;
+        const decalHeight = img2.height;
         const wrapper = document.createElement('div');
-        Object.assign(wrapper.style, { position: 'relative', width: '100%', height: bgHeight + 'px', margin: '8px 0 0' });
+        Object.assign(wrapper.style, { position: 'relative', width: '100%', height: wrapperHeight + 'px', margin: '8px 0 0' });
 
         const footerWidth = () => footer.clientWidth || document.documentElement.clientWidth;
-        const { c: canvasBg, ctx: ctxBg } = makeCanvas(footerWidth(), bgHeight, { position: 'absolute', left: '0', top: '0', zIndex: '1', width: '100%', height: bgHeight + 'px' });
-        const { c: canvasFg, ctx: ctxFg } = makeCanvas(img1.width, img1.height, { position: 'absolute', right: '0', top: '0', zIndex: '2', opacity: '0.95', width: img1.width + 'px', height: img1.height + 'px' });
+        const { c: canvasBg, ctx: ctxBg } = makeCanvas(footerWidth(), decalHeight, {
+            position: 'absolute', left: '0', bottom: '0', zIndex: '1', width: '100%', height: decalHeight + 'px'
+        });
+        const { c: canvasFg, ctx: ctxFg } = makeCanvas(img1.width, img1.height, {
+            position: 'absolute', right: '0', top: '0', zIndex: '2', opacity: '0.95', width: img1.width + 'px', height: img1.height + 'px'
+        });
 
         const drawBg = () => {
             const w = footerWidth();
             canvasBg.width = w;
-            canvasBg.height = bgHeight;
-            canvasBg.style.height = bgHeight + 'px';
-            ctxBg.drawImage(img2, 0, 0, w, bgHeight);
+            canvasBg.height = decalHeight;
+            canvasBg.style.height = decalHeight + 'px';
+            ctxBg.clearRect(0, 0, w, decalHeight);
+            ctxBg.drawImage(img2, 0, 0, w, decalHeight);
         };
 
+        ctxFg.clearRect(0, 0, canvasFg.width, canvasFg.height);
         ctxFg.drawImage(img1, 0, 0);
         drawBg();
 
