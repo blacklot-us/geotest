@@ -12,6 +12,7 @@
         <h1>Geotest</h1>
         <nav>
             <ul style="position:fixed; right:1.5rem; top:1.25rem; display:flex; align-items:center; list-style:none; margin: 0; padding:0;">
+                <button id="botonPlayPause">▶</button>
                 <li style="margin-left:1em;"><a href="https://github.com/blacklotux">GitHub</a></li>
                 <li style="margin-left:1em;"><a href="https://github.com/blacklotux/geotest">Repo.</a></li>
                 <li style="margin-left:1em;"><a href="https://www.youtube.com/@iorux">My YouTube Ch.</a></li>
@@ -21,7 +22,31 @@
 
     <main>
         <section>
-            <p>&copy; 2025</p>
+            <audio id="websong" src="astral breeze.mp3" preload="auto"></audio>
+            <script>
+                const audio = document.getElementById('websong');
+                const boton = document.getElementById('botonPlayPause');
+                boton.innerHTML = '▶';
+                boton.addEventListener('click', () => {
+                    if (audio.paused) {
+                        audio.play()
+                            .then(() => {
+                                boton.innerHTML = '⏸';
+                            })
+                            .catch(err => {
+                                console.error("Error al reproducir:", err);
+                                alert("No se pudo reproducir el audio. Posible bloqueo del navegador.");
+                            });
+                    } else {
+                        audio.pause();
+                        boton.innerHTML = '▶';
+                    }
+                });
+                audio.addEventListener('ended', () => {
+                    boton.innerHTML = '▶';
+                });
+            </script>
+            <p>&copy; 2025</p> 
         </section>
     </main>
 
