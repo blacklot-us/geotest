@@ -27,7 +27,7 @@
     };
 
     try {
-        const [b1, b2] = await Promise.all([fetchBlob('y2k-angels.png'), fetchBlob('vinyl-decal.png')]);
+        const [b1, b2] = await Promise.all([fetchBlob('./images/y2k-angels.png'), fetchBlob('./images/vinyl-decal.png')]);
         const [{ img: img1, url: u1 }, { img: img2, url: u2 }] = await Promise.all([blobToImage(b1), blobToImage(b2)]);
 
         const wrapperHeight = img1.height;

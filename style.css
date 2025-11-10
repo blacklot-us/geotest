@@ -34,7 +34,7 @@ body {
 
 @font-face {
     font-family: 'KA1';
-    src: url('./ka1.ttf') format('truetype');
+    src: url('./fonts/ka1.ttf') format('truetype');
     font-style: normal;
     font-weight: 400;
     font-display: swap;
@@ -50,7 +50,7 @@ header {
 
 @font-face {
     font-family: 'AudioNugget';
-    src: url('./AudioNugget.ttf') format('truetype');
+    src: url('./fonts/AudioNugget.ttf') format('truetype');
     font-style: normal;
     font-weight: 700;
     font-display: swap;
