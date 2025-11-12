@@ -1,4 +1,4 @@
-# List of multimedia included on Geotest
+# List of multimedia included in Geotest
 
 __Clarification__: Geotest is a project that exists with the sole purpose of serving as personal training to improve my coding.
 It was made without profit motives, and there is no interest in violating the intellectual property of others.
