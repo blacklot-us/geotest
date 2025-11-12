@@ -8,4 +8,4 @@ Here is a list of the respective authors:
 * [VinylImagination (vinyl_decal.png)](https://vinylimagination.com/)
 * [UkiyoMoji Fonts (AudioNugget.ttf)](https://behance.net/japanyoshi)
 * [Vic Fieger (ka1.ttf)](https://dafont.com/profile.php?user=16024)
-* [Arcologies ("astral breeze.mp3")](https://arcologies.bandcamp.com/)
+* [Arcologies (astral breeze.mp3)](https://arcologies.bandcamp.com/)
